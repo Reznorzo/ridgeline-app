@@ -2,7 +2,10 @@
 Route management endpoints.
 """
 
-from fastapi import APIRouter, HTTPException
+import tempfile
+from pathlib import Path
+
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from app.database import get_connection
 from app.schemas import RouteCreate, RouteOut, GPXImportOut
 from app.gpx import analyze_gpx_file
@@ -42,33 +45,36 @@ async def create_route(route: RouteCreate):
 
 
 @router.post("/import-gpx", response_model=GPXImportOut)
-async def import_gpx(gpx_data: bytes = None):
+async def import_gpx(file: UploadFile = File(...)):
     """Import a GPX file and create a route from it."""
-    if gpx_data is None:
+    gpx_data = await file.read()
+    if not gpx_data:
         raise HTTPException(status_code=400, detail="No GPX data provided")
-
-    from app.gpx import analyze_gpx_file
-    from pathlib import Path
-    import tempfile
 
     with tempfile.NamedTemporaryFile(suffix=".gpx", delete=False) as f:
         f.write(gpx_data)
+        temp_path = Path(f.name)
 
-    metrics = analyze_gpx_file(Path(f.name))
+    try:
+        metrics = analyze_gpx_file(temp_path)
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+    route_name = Path(file.filename or metrics["file_name"]).stem
 
     db = get_connection()
     cursor = db.execute(
         """INSERT INTO routes (name, distance_km, ascent_m, high_point_m,
            gpx_hash, gpx_revision)
            VALUES (?, ?, ?, ?, ?, 1)""",
-        (metrics["file_name"], metrics["distance_km"], metrics["ascent_m"],
+        (route_name, metrics["distance_km"], metrics["ascent_m"],
          metrics["high_point_m"], metrics["gpx_hash"]),
     )
     db.commit()
 
     return GPXImportOut(
         id=cursor.lastrowid,
-        name=metrics["file_name"],
+        name=route_name,
         gpx_hash=metrics["gpx_hash"],
         distance_km=metrics["distance_km"],
         ascent_m=metrics["ascent_m"],

@@ -1,23 +1,9 @@
-﻿# Python
 __pycache__/
 *.py[cod]
-*.class
-*.so
-.Python
+.pytest_cache/
+.ruff_cache/
+.venv/
 venv/
-.environ
-*.egg-info/
-*.egg
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Local config overrides (if any)
-.env.local
+*.db
+*.sqlite
+*.sqlite3
