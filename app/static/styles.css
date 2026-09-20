@@ -1,0 +1,259 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f8f3;
+  --ink: #1b2721;
+  --muted: #5d6b62;
+  --line: #d8ded4;
+  --panel: #ffffff;
+  --accent: #176c72;
+  --accent-strong: #0f4f54;
+  --sun: #c27b2c;
+  --leaf: #587744;
+  --danger: #a84636;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 0.9rem;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent-strong);
+}
+
+button.secondary {
+  background: #e9eee7;
+  color: var(--ink);
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 2.4rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  background: #fff;
+  color: var(--ink);
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem clamp(1rem, 4vw, 2rem);
+  border-bottom: 1px solid var(--line);
+  background: #eef2ec;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  letter-spacing: 0;
+}
+
+.topbar p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(19rem, 0.9fr) minmax(20rem, 1.2fr);
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 0;
+}
+
+.gear-panel {
+  grid-column: 1 / -1;
+}
+
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.section-heading span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.upload-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.route-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.route-form label:first-child,
+.route-form button {
+  grid-column: 1 / -1;
+}
+
+.route-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.route-card,
+.gear-card,
+.rec-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.8rem;
+  background: #fff;
+}
+
+.route-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.route-card h3,
+.gear-card h3,
+.rec-card h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.meta,
+.notes {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.recommendation-summary {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f9fbf8;
+  margin-bottom: 0.75rem;
+}
+
+.rec-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.bucket {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.55rem;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0 0.55rem;
+  color: #fff;
+  font-size: 0.78rem;
+  background: var(--leaf);
+  text-transform: capitalize;
+}
+
+.bucket.pack,
+.bucket.optional {
+  background: var(--sun);
+}
+
+.bucket.leave_home {
+  background: var(--danger);
+}
+
+.gear-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+
+.empty-state,
+.error-state {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--muted);
+  background: #fbfcfa;
+}
+
+.error-state {
+  border-color: #d9aaa2;
+  color: var(--danger);
+}
+
+@media (max-width: 860px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-row,
+  .route-form,
+  .route-card {
+    grid-template-columns: 1fr;
+  }
+}

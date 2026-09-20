@@ -5,11 +5,18 @@ A local-first, LAN-only web application that recommends hiking gear based on
 routes, weather, and personal preferences.
 """
 
+from pathlib import Path
+
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from app.config import PORT
 from app.database import init_db
 from app.routers import routes, loadout, health
+
+APP_DIR = Path(__file__).resolve().parent
+STATIC_DIR = APP_DIR / "static"
 
 app = FastAPI(
     title="Ridgeline",
@@ -20,6 +27,7 @@ app = FastAPI(
 app.include_router(health.router)
 app.include_router(routes.router)
 app.include_router(loadout.router)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.on_event("startup")
@@ -27,9 +35,9 @@ async def startup():
     init_db()
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"app": "Ridgeline", "version": "0.1.0"}
+    return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
 
 
 def main():

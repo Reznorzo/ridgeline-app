@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ridgeline</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Ridgeline</h1>
+        <p id="status">Checking service...</p>
+      </div>
+      <button id="refresh" type="button" title="Refresh data">Refresh</button>
+    </header>
+
+    <main class="layout">
+      <section class="panel route-panel">
+        <div class="section-heading">
+          <h2>Route</h2>
+          <span id="route-count">0 routes</span>
+        </div>
+
+        <form id="gpx-form" class="upload-row">
+          <input id="gpx-file" name="file" type="file" accept=".gpx,application/gpx+xml">
+          <button type="submit">Import GPX</button>
+        </form>
+
+        <form id="route-form" class="route-form">
+          <label>
+            Name
+            <input id="route-name" name="name" required placeholder="Evening loop">
+          </label>
+          <label>
+            Distance km
+            <input id="route-distance" name="distance_km" type="number" min="0" step="0.1">
+          </label>
+          <label>
+            Ascent m
+            <input id="route-ascent" name="ascent_m" type="number" min="0" step="1">
+          </label>
+          <label>
+            High point m
+            <input id="route-high-point" name="high_point_m" type="number" min="0" step="1">
+          </label>
+          <label>
+            Duration min
+            <input id="route-duration" name="expected_duration_min" type="number" min="0" step="5">
+          </label>
+          <label>
+            Exposure
+            <select id="route-exposure" name="exposure">
+              <option value="mixed">Mixed</option>
+              <option value="sheltered">Sheltered</option>
+              <option value="exposed">Exposed</option>
+            </select>
+          </label>
+          <button type="submit">Add Route</button>
+        </form>
+
+        <div id="routes" class="route-list"></div>
+      </section>
+
+      <section class="panel recommendation-panel">
+        <div class="section-heading">
+          <h2>Recommendation</h2>
+          <span id="selected-route">No route selected</span>
+        </div>
+        <div id="recommendation" class="empty-state">Select a route to build a loadout.</div>
+      </section>
+
+      <section class="panel gear-panel">
+        <div class="section-heading">
+          <h2>Gear</h2>
+          <span id="gear-count">0 items</span>
+        </div>
+        <div id="gear" class="gear-grid"></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
