@@ -3,82 +3,141 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d120f">
     <title>Ridgeline</title>
     <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <h1>Ridgeline</h1>
-        <p id="status">Checking service...</p>
-      </div>
-      <button id="refresh" type="button" title="Refresh data">Refresh</button>
-    </header>
+    <div class="app-shell">
+      <aside class="rail">
+        <a class="brand" href="#plan" data-go="plan" aria-label="Ridgeline, plan a hike">
+          <span class="brand-mark" aria-hidden="true">R</span>
+          <span><strong>Ridgeline</strong><small>Loadout planner</small></span>
+        </a>
 
-    <main class="layout">
-      <section class="panel route-panel">
-        <div class="section-heading">
-          <h2>Route</h2>
-          <span id="route-count">0 routes</span>
+        <nav class="primary-nav" aria-label="Primary">
+          <button class="nav-item active" type="button" data-go="plan" aria-current="page">
+            <span>01</span> Plan
+          </button>
+          <button class="nav-item" type="button" data-go="loadout">
+            <span>02</span> Loadout
+          </button>
+        </nav>
+
+        <div class="rail-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="status" role="status">Checking service…</span>
         </div>
+      </aside>
 
-        <form id="gpx-form" class="upload-row">
-          <input id="gpx-file" name="file" type="file" accept=".gpx,application/gpx+xml">
-          <button type="submit">Import GPX</button>
-        </form>
+      <main class="main-content">
+        <section id="screen-plan" class="screen active" aria-labelledby="plan-title">
+          <header class="page-heading">
+            <div>
+              <p class="eyebrow">Plan</p>
+              <h1 id="plan-title">What are you walking?</h1>
+              <p class="lede">Choose a saved route or import a GPX, then build a loadout around the trail and how you actually hike.</p>
+            </div>
+            <button id="refresh" class="quiet-button" type="button" title="Refresh routes and gear">
+              <span aria-hidden="true">↻</span> Refresh
+            </button>
+          </header>
 
-        <form id="route-form" class="route-form">
-          <label>
-            Name
-            <input id="route-name" name="name" required placeholder="Evening loop">
-          </label>
-          <label>
-            Distance km
-            <input id="route-distance" name="distance_km" type="number" min="0" step="0.1">
-          </label>
-          <label>
-            Ascent m
-            <input id="route-ascent" name="ascent_m" type="number" min="0" step="1">
-          </label>
-          <label>
-            High point m
-            <input id="route-high-point" name="high_point_m" type="number" min="0" step="1">
-          </label>
-          <label>
-            Duration min
-            <input id="route-duration" name="expected_duration_min" type="number" min="0" step="5">
-          </label>
-          <label>
-            Exposure
-            <select id="route-exposure" name="exposure">
-              <option value="mixed">Mixed</option>
-              <option value="sheltered">Sheltered</option>
-              <option value="exposed">Exposed</option>
-            </select>
-          </label>
-          <button type="submit">Add Route</button>
-        </form>
+          <div class="content-grid">
+            <section class="card route-card-panel" aria-labelledby="routes-title">
+              <div class="card-heading">
+                <div>
+                  <p class="kicker">Saved routes</p>
+                  <h2 id="routes-title">Choose your route</h2>
+                </div>
+                <span id="route-count" class="count-pill">0 routes</span>
+              </div>
 
-        <div id="routes" class="route-list"></div>
-      </section>
+              <form id="gpx-form" class="import-row">
+                <label class="file-picker" for="gpx-file">
+                  <span aria-hidden="true">＋</span>
+                  <span><strong>Import GPX</strong><small id="gpx-label">Choose a route file</small></span>
+                </label>
+                <input id="gpx-file" name="file" type="file" accept=".gpx,application/gpx+xml">
+                <button type="submit">Import</button>
+              </form>
 
-      <section class="panel recommendation-panel">
-        <div class="section-heading">
-          <h2>Recommendation</h2>
-          <span id="selected-route">No route selected</span>
-        </div>
-        <div id="recommendation" class="empty-state">Select a route to build a loadout.</div>
-      </section>
+              <div id="routes" class="route-list" aria-live="polite"></div>
+            </section>
 
-      <section class="panel gear-panel">
-        <div class="section-heading">
-          <h2>Gear</h2>
-          <span id="gear-count">0 items</span>
-        </div>
-        <div id="gear" class="gear-grid"></div>
-      </section>
-    </main>
+            <aside class="card context-card" aria-label="Route context">
+              <div class="topographic" aria-hidden="true">
+                <svg viewBox="0 0 500 260" preserveAspectRatio="xMidYMid slice">
+                  <path d="M-30 200c95-15 78-104 179-91s74 102 177 67 92-112 206-63"/>
+                  <path d="M-18 226c102-17 92-91 184-83s81 84 177 56 93-84 185-58"/>
+                  <path d="M25 265c94-31 79-83 164-82s84 67 165 47 83-62 155-48"/>
+                  <path class="route-line" d="M54 217c55-44 85-18 125-65s78-38 110-4 67 27 107-15 54-32 76-6"/>
+                </svg>
+              </div>
+              <div class="context-copy">
+                <p class="kicker">Route context</p>
+                <h2>Terrain first.</h2>
+                <p>Distance, ascent and exposure shape the recommendation. Weather detail will support the decision as forecast integration comes online.</p>
+              </div>
+              <dl class="context-stats">
+                <div><dt>Gear ready</dt><dd id="gear-count">0 items</dd></div>
+                <div><dt>Selected</dt><dd id="selected-route">None yet</dd></div>
+              </dl>
+            </aside>
+          </div>
 
+          <details class="card manual-route">
+            <summary>Add a route without GPX <span aria-hidden="true">＋</span></summary>
+            <form id="route-form" class="route-form">
+              <label class="field-wide"><span>Name</span><input id="route-name" name="name" required placeholder="Evening loop"></label>
+              <label><span>Distance <small>km</small></span><input id="route-distance" name="distance_km" type="number" min="0" step="0.1"></label>
+              <label><span>Ascent <small>m</small></span><input id="route-ascent" name="ascent_m" type="number" min="0" step="1"></label>
+              <label><span>High point <small>m</small></span><input id="route-high-point" name="high_point_m" type="number" min="0" step="1"></label>
+              <label><span>Duration <small>min</small></span><input id="route-duration" name="expected_duration_min" type="number" min="0" step="5"></label>
+              <label class="field-wide"><span>Exposure</span><select id="route-exposure" name="exposure"><option value="mixed">Mixed</option><option value="sheltered">Sheltered</option><option value="exposed">Exposed</option></select></label>
+              <button class="field-wide" type="submit">Save route</button>
+            </form>
+          </details>
+        </section>
+
+        <section id="screen-loadout" class="screen" aria-labelledby="loadout-title" hidden>
+          <header class="page-heading">
+            <div>
+              <p class="eyebrow">Loadout</p>
+              <h1 id="loadout-title">Your trail loadout.</h1>
+              <p class="lede">A practical starting point from your route and the gear you already own.</p>
+            </div>
+            <button class="quiet-button" type="button" data-go="plan">← Change route</button>
+          </header>
+
+          <section class="route-banner" aria-live="polite">
+            <div><span class="kicker">Route</span><strong id="loadout-route-name">No route selected</strong></div>
+            <p id="loadout-route-meta">Choose a route from Plan to build a recommendation.</p>
+          </section>
+
+          <div id="recommendation" class="recommendation-empty">
+            <span class="empty-mark" aria-hidden="true">△</span>
+            <h2>Start with a route</h2>
+            <p>Select a saved route to generate your loadout.</p>
+            <button type="button" data-go="plan">Choose a route</button>
+          </div>
+
+          <details class="gear-library card">
+            <summary><span><span class="kicker">Inventory</span><strong>Obsidian gear library</strong></span><span aria-hidden="true">＋</span></summary>
+            <div class="gear-tools">
+              <label><span class="sr-only">Search gear</span><input id="gear-search" type="search" placeholder="Search gear"></label>
+              <label><span class="sr-only">Filter gear category</span><select id="gear-category"><option value="">All categories</option></select></label>
+            </div>
+            <div id="gear" class="gear-grid" aria-live="polite"></div>
+          </details>
+        </section>
+      </main>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Primary">
+      <button class="active" type="button" data-go="plan"><span>⌁</span>Plan</button>
+      <button type="button" data-go="loadout"><span>△</span>Loadout</button>
+    </nav>
     <script src="/static/app.js" defer></script>
   </body>
 </html>

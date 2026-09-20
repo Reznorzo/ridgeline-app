@@ -57,6 +57,111 @@ Not a gear note.
         self.assertEqual(result.items[0].capabilities, "grip, fast-drying")
         self.assertIs(result.items[0].raw_yaml["field_observation"], None)
 
+    def test_excludes_non_gear_notes_with_generic_frontmatter(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            vault = Path(temp_dir)
+            (vault / "Project.md").write_text(
+                """---
+type: project
+category: personal
+status: active
+---
+This is not outdoor equipment.
+""",
+                encoding="utf-8",
+            )
+            journal = vault / "Journal"
+            journal.mkdir()
+            (journal / "Wet walk.md").write_text(
+                """---
+type: note
+role: observation
+capabilities: [reflection]
+---
+It rained.
+""",
+                encoding="utf-8",
+            )
+
+            result = read_gear_vault(temp_dir)
+
+        self.assertEqual(result.errors, [])
+        self.assertEqual(result.items, [])
+
+    def test_accepts_explicitly_marked_gear_outside_known_directory(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            vault = Path(temp_dir)
+            archive = vault / "Archive"
+            archive.mkdir()
+            (archive / "Rain mitts.md").write_text(
+                """---
+note_type: gear
+type: gloves
+category: clothing
+---
+""",
+                encoding="utf-8",
+            )
+            (vault / "Poles.md").write_text(
+                """---
+gear: true
+type: poles
+---
+""",
+                encoding="utf-8",
+            )
+
+            result = read_gear_vault(temp_dir)
+
+        self.assertEqual({item.name for item in result.items}, {"Rain mitts", "Poles"})
+
+    def test_reads_nested_notes_from_a_gear_directory(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            nested = Path(temp_dir) / "Gear" / "Sleep"
+            nested.mkdir(parents=True)
+            (nested / "Quilt.md").write_text(
+                """---
+type: insulation
+category: sleep
+---
+""",
+                encoding="utf-8",
+            )
+
+            result = read_gear_vault(temp_dir)
+
+        self.assertEqual([item.name for item in result.items], ["Quilt"])
+
+    def test_reads_live_vault_gear_location_without_other_second_brain_notes(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            vault = Path(temp_dir)
+            gear_dir = vault / "Second Brain" / "Notes" / "Hiking" / "Gear"
+            gear_dir.mkdir(parents=True)
+            (gear_dir / "Trail shoes.md").write_text(
+                """---
+name: Trail shoes
+category: Footwear
+owned: true
+---
+""",
+                encoding="utf-8",
+            )
+            concepts = vault / "Second Brain" / "concepts"
+            concepts.mkdir(parents=True)
+            (concepts / "Project.md").write_text(
+                """---
+type: concept
+status: active
+category: software
+---
+""",
+                encoding="utf-8",
+            )
+
+            result = read_gear_vault(temp_dir)
+
+        self.assertEqual([item.name for item in result.items], ["Trail shoes"])
+
 
 if __name__ == "__main__":
     unittest.main()

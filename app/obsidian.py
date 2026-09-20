@@ -85,25 +85,45 @@ def parse_frontmatter(text: str) -> dict[str, Any] | None:
     return result if result else None
 
 
+KNOWN_GEAR_PATHS = (
+    ("gear",),
+    ("hiking", "gear"),
+    ("notes", "hiking", "gear"),
+    ("second brain", "notes", "hiking", "gear"),
+)
+
+
 def _candidate_note_files(path: Path) -> list[Path]:
-    gear_dirs = [
-        path,
-        path / "Gear",
-        path / "Hiking" / "Gear",
-        path / "Notes" / "Hiking" / "Gear",
-    ]
-    files: list[Path] = []
-    for gear_dir in gear_dirs:
-        if gear_dir.exists() and gear_dir.is_dir():
-            files.extend(gear_dir.glob("*.md"))
-    if files:
-        return sorted(set(files))
+    """Return Markdown notes that may be in a gear path or explicitly marked."""
     return sorted(path.rglob("*.md"))
 
 
-def _looks_like_gear(frontmatter: dict[str, Any]) -> bool:
-    gear_keys = {"type", "category", "role", "capabilities", "owned", "status", "field_observation"}
-    return bool(gear_keys.intersection(frontmatter.keys()))
+def _is_known_gear_path(note: Path, vault: Path) -> bool:
+    """Recognize the supported gear directories without accepting the vault root."""
+    relative_parts = tuple(part.casefold() for part in note.relative_to(vault).parts[:-1])
+    if vault.name.casefold() == "gear":
+        return True
+    return any(relative_parts[: len(prefix)] == prefix for prefix in KNOWN_GEAR_PATHS)
+
+
+def _marker_values(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip().casefold().lstrip("#") for item in value]
+    if value is None:
+        return []
+    return [part.strip().casefold().lstrip("#") for part in str(value).split(",")]
+
+
+def _has_explicit_gear_marker(frontmatter: dict[str, Any]) -> bool:
+    """Accept opt-in markers for gear notes stored outside known gear paths."""
+    if frontmatter.get("gear") is True:
+        return True
+
+    for key in ("ridgeline", "kind", "note_type"):
+        if "gear" in _marker_values(frontmatter.get(key)):
+            return True
+
+    return bool({"gear", "ridgeline/gear"}.intersection(_marker_values(frontmatter.get("tags"))))
 
 
 def read_gear_vault(source_path: str = OBSIDAN_MOUNT) -> ParseResult:
@@ -133,7 +153,7 @@ def read_gear_vault(source_path: str = OBSIDAN_MOUNT) -> ParseResult:
         frontmatter = parse_frontmatter(text)
         if frontmatter is None:
             continue
-        if not _looks_like_gear(frontmatter):
+        if not (_is_known_gear_path(md_file, path) or _has_explicit_gear_marker(frontmatter)):
             continue
 
         name = md_file.stem
