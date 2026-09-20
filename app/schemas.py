@@ -24,7 +24,7 @@ class RouteOut(BaseModel):
     ascent_m: float | None = None
     high_point_m: float | None = None
     expected_duration_min: float | None = None
-    exposure: str
+    exposure: str | None = None
     gpx_hash: str | None = None
     gpx_revision: int = 1
     last_walked: str | None = None
