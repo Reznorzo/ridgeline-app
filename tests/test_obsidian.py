@@ -25,6 +25,84 @@ Body
         self.assertEqual(frontmatter["capabilities"], ["rain", "wind"])
         self.assertTrue(frontmatter["owned"])
 
+    def test_normalises_nested_preferences_evidence_pairings_and_empty_observations(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            gear_dir = Path(temp_dir) / "Second Brain" / "Notes" / "Hiking" / "Gear"
+            gear_dir.mkdir(parents=True)
+            (gear_dir / "Test shell.md").write_text(
+                """---
+name: Test shell
+category: Jacket
+brand: Example
+owned: true
+waterproof: true
+protection_evidence:
+  sustained_rain: needs_test
+  source: personal
+breathability: high
+ventilation: moderate
+preferences:
+  preferred_when: light showers
+  avoid_when: hot climbs
+  notes: Runs warm.
+features:
+  - Breathable
+pairings:
+  - item: "[[Backup shell]]"
+    use_when: rain persists
+field_observations:
+  - date:
+    route:
+    result:
+status: [owned]
+---
+""",
+                encoding="utf-8",
+            )
+
+            result = read_gear_vault(temp_dir)
+
+        self.assertEqual(result.errors, [])
+        item = result.items[0]
+        self.assertEqual(item.id, "gear:test-shell")
+        self.assertEqual(item.protection_evidence, "needs_test")
+        self.assertEqual(item.preferred_when, "light showers")
+        self.assertEqual(item.avoid_when, "hot climbs")
+        self.assertEqual(item.features, ["Breathable"])
+        self.assertEqual(item.pairings[0]["use_when"], "rain persists")
+        self.assertEqual(item.field_observations, [])
+        self.assertEqual(len(item.source_hash), 64)
+        self.assertTrue(item.is_owned)
+
+    def test_reports_malformed_gear_frontmatter_without_losing_other_items(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            gear_dir = Path(temp_dir) / "Gear"
+            gear_dir.mkdir()
+            (gear_dir / "Broken.md").write_text(
+                """---
+name: [broken
+category: Jacket
+---
+""",
+                encoding="utf-8",
+            )
+            (gear_dir / "Valid.md").write_text(
+                """---
+name: Valid
+category: Jacket
+owned: true
+status: [owned]
+---
+""",
+                encoding="utf-8",
+            )
+
+            result = read_gear_vault(temp_dir)
+
+        self.assertEqual([item.name for item in result.items], ["Valid"])
+        self.assertEqual(len(result.errors), 1)
+        self.assertIn("Failed to parse Broken.md", result.errors[0])
+
     def test_reads_hiking_gear_notes_from_vault_root(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             gear_dir = Path(temp_dir) / "Hiking" / "Gear"
@@ -129,8 +207,10 @@ category: sleep
             )
 
             result = read_gear_vault(temp_dir)
+            direct_result = read_gear_vault(str(Path(temp_dir) / "Gear"))
 
         self.assertEqual([item.name for item in result.items], ["Quilt"])
+        self.assertEqual(result.items[0].id, direct_result.items[0].id)
 
     def test_reads_live_vault_gear_location_without_other_second_brain_notes(self):
         with tempfile.TemporaryDirectory() as temp_dir:

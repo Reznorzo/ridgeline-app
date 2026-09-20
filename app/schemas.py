@@ -2,7 +2,6 @@
 Pydantic schemas for API request/response validation.
 """
 
-from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -32,7 +31,7 @@ class RouteOut(BaseModel):
 
 
 class GearItemOut(BaseModel):
-    id: int | None = None
+    id: str | int | None = None
     name: str
     type: str = ""
     category: str = ""
@@ -40,6 +39,35 @@ class GearItemOut(BaseModel):
     capabilities: str = ""
     notes: str = ""
     owner: str = "andy"
+    source_path: str = ""
+    source_hash: str = ""
+    brand: str = ""
+    model: str = ""
+    owned: bool | None = None
+    status: list[str] = Field(default_factory=list)
+    weight_g: float | None = None
+    waterproof: bool | None = None
+    protection_evidence: str = ""
+    water_resistance: str = ""
+    wind_resistance: str = ""
+    breathability: str = ""
+    ventilation: str = ""
+    insulation: str = ""
+    drying_speed: str = ""
+    durability: str = ""
+    season: str = ""
+    temperature_min: float | None = None
+    temperature_max: float | None = None
+    layer_role: str = ""
+    worn_over_categories: list[str] = Field(default_factory=list)
+    activities: dict[str, bool | None] = Field(default_factory=dict)
+    conditions: dict[str, bool | None] = Field(default_factory=dict)
+    features: list[str] = Field(default_factory=list)
+    preferred_when: str = ""
+    avoid_when: str = ""
+    preference_notes: str = ""
+    pairings: list[dict[str, Any]] = Field(default_factory=list)
+    diagnostics: list[str] = Field(default_factory=list)
 
 
 class RecommendationItemOut(BaseModel):
@@ -47,6 +75,10 @@ class RecommendationItemOut(BaseModel):
     bucket: str
     reason: str = ""
     cue: str = ""
+    decisive_factors: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+    depends_on_gear_ids: list[str] = Field(default_factory=list)
+    combination_reason: str = ""
 
 
 class RecommendationOut(BaseModel):
@@ -54,6 +86,8 @@ class RecommendationOut(BaseModel):
     confidence: str
     summary: str
     conditions: dict[str, Any] | None = None
+    policy_version: str = ""
+    warnings: list[str] = Field(default_factory=list)
 
 
 class ForecastSnapshotOut(BaseModel):

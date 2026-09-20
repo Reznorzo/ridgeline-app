@@ -118,6 +118,7 @@ function renderGearCategories() {
 }
 
 function renderRecommendation(data) {
+  const conditions = Object.entries(data.conditions || {}).filter(([, value]) => value !== null && value !== undefined);
   els.recommendation.className = "recommendation-result";
   els.recommendation.innerHTML = `
     <div class="recommendation-summary">
@@ -125,6 +126,18 @@ function renderRecommendation(data) {
       <h2>${escapeHtml(data.summary || "Your loadout is ready.")}</h2>
       <p class="meta">Review the reasons and conditional cues before heading out.</p>
       <span class="confidence">${escapeHtml(data.confidence)} confidence</span>
+      ${data.policy_version ? `<p class="meta">Policy ${escapeHtml(data.policy_version)}</p>` : ""}
+      ${conditions.length ? `
+        <dl class="condition-strip">
+          ${conditions.map(([label, value]) => `<div><dt>${escapeHtml(label.replaceAll("_", " "))}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}
+        </dl>
+      ` : ""}
+      ${data.warnings?.length ? `
+        <div class="recommendation-warnings" role="alert">
+          <strong>Conditions and data warnings</strong>
+          <ul>${data.warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul>
+        </div>
+      ` : ""}
     </div>
     <div class="rec-list">
       ${data.items.map((item) => `
@@ -132,7 +145,9 @@ function renderRecommendation(data) {
           <span class="bucket ${escapeHtml(item.bucket)}">${escapeHtml(item.bucket.replace("_", " "))}</span>
           <h3>${escapeHtml(item.gear_item.name)}</h3>
           ${item.reason ? `<p class="notes">${escapeHtml(item.reason)}</p>` : ""}
+          ${item.combination_reason ? `<p class="pairing-note">${escapeHtml(item.combination_reason)}</p>` : ""}
           ${item.cue ? `<p class="meta">${escapeHtml(item.cue)}</p>` : ""}
+          ${item.caveats?.length ? `<p class="caveat">${escapeHtml(item.caveats.join(" "))}</p>` : ""}
         </article>
       `).join("")}
     </div>

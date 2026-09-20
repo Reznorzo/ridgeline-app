@@ -6,7 +6,7 @@ This repository is the **application codebase**. Deployment into the homelab
 is handled by the `nixos-infra` repository, which owns the NixOS service
 module, the Proxmox LXC, and the Obsidian vault bind-mount.
 
-## Repo layout (proposed)
+## Repo layout
 
 ```
 ridgeline-app/
@@ -61,11 +61,30 @@ App-owned state lives in `/var/lib/ridgeline` inside the LXC:
   recommendation runs, forecast snapshots)
 - Managed GPX files (copied on import, content-hashed)
 
+## Gear ingestion and recommendations
+
+Ridgeline reads the configured Obsidian vault without modifying it. Gear notes
+are accepted only from the known `Second Brain/Notes/Hiking/Gear` location (and
+compatible gear-root layouts) or through an explicit gear marker. YAML
+frontmatter is normalized into stable source-derived IDs, source hashes,
+nullable capabilities, preferences, pairings, evidence, and diagnostics.
+
+Recommendation policy `2026-09-20.1` is deterministic and explainable. It
+separates wetting load from thermal consequence, enforces coherent footwear,
+trouser, overtrouser, and jacket choices, and returns wear/pack/optional/
+leave-home placements with reasons, cues, pairings, caveats, warnings, and
+confidence. Missing forecasts or gear evidence lower confidence rather than
+being replaced with fabricated conditions.
+
+Open-Meteo ingestion is not implemented yet. Until forecast snapshots are
+available, live recommendations intentionally report low confidence and use
+conservative weather-dependent placements.
+
 ## Runtime
 
-TBD — either a Python project run via `uv`, packaged as a Nix derivation,
-or vendored. The NixOS module should not over-commit to the packaging
-approach until the app repo settles on one.
+The application is a FastAPI service. Runtime configuration is provided by
+`OBSIDIAN_MOUNT`, `STATE_DIR`, `DB_PATH`, and `PORT`. Production uses the
+Nix-managed Python environment declared by `nixos-infra`.
 
 ## Access
 
