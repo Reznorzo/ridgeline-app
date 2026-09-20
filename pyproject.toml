@@ -1,0 +1,19 @@
+[project]
+name = "ridgeline"
+version = "0.1.0"
+description = "Hiking loadout recommendation engine"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.140.0",
+    "uvicorn[standard]>=0.20.0",
+    "python-multipart>=0.0.6",
+    "gpxpy>=1.0",
+    "pydantic>=2.0",
+    "python-dateutil>=2.8",
+]
+
+[project.scripts]
+ridgeline = "app.main:app"
+
+[tool.uv]
+dev-dependencies = []
